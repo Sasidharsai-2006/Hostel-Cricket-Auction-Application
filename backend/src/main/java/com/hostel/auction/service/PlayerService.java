@@ -41,22 +41,26 @@ public class PlayerService {
     private final AuctionRoundRepository roundRepository;
 
     public static boolean isFirstYear(String year) {
-        if (year == null) return false;
+        if (year == null || year.isBlank()) return false;
         String y = year.trim().toLowerCase();
-        return y.contains("1st") || y.contains("first") || y.matches(".*\\b1\\b.*");
+        return y.contains("1st") || y.contains("first") || y.matches(".*\\b(1|1st|first|i)\\b.*") || y.startsWith("1");
+    }
+
+    public static int getYearRank(String year) {
+        if (year == null || year.isBlank()) return 3;
+        String y = year.trim().toLowerCase();
+        if (y.contains("2nd") || y.contains("second") || y.matches(".*\\b(2|2nd|second|ii)\\b.*") || y.startsWith("2")) {
+            return 2;
+        } else if (y.contains("3rd") || y.contains("third") || y.matches(".*\\b(3|3rd|third|iii)\\b.*") || y.startsWith("3")) {
+            return 3;
+        } else if (y.contains("4th") || y.contains("fourth") || y.contains("final") || y.matches(".*\\b(4|4th|fourth|iv)\\b.*") || y.startsWith("4")) {
+            return 4;
+        }
+        return 3;
     }
 
     public static int getBasePriceForYear(String year) {
-        if (year == null) return 20;
-        String y = year.trim().toLowerCase();
-        if (y.contains("2nd") || y.contains("second") || y.matches(".*\\b2\\b.*")) {
-            return 15;
-        } else if (y.contains("3rd") || y.contains("third") || y.matches(".*\\b3\\b.*")) {
-            return 20;
-        } else if (y.contains("4th") || y.contains("fourth") || y.contains("final") || y.matches(".*\\b4\\b.*")) {
-            return 20;
-        }
-        return 20;
+        return getYearRank(year) == 2 ? 15 : 20;
     }
 
     @Transactional(readOnly = true)
@@ -284,12 +288,12 @@ public class PlayerService {
             List<Player> otherList = new ArrayList<>();
 
             for (Player p : playersToSave) {
-                String y = p.getYear() != null ? p.getYear().toLowerCase() : "";
-                if (y.contains("2nd") || y.contains("second") || y.matches(".*\\b2\\b.*")) {
+                int rank = getYearRank(p.getYear());
+                if (rank == 2) {
                     y2List.add(p);
-                } else if (y.contains("3rd") || y.contains("third") || y.matches(".*\\b3\\b.*")) {
+                } else if (rank == 3) {
                     y3List.add(p);
-                } else if (y.contains("4th") || y.contains("fourth") || y.contains("final") || y.matches(".*\\b4\\b.*")) {
+                } else if (rank == 4) {
                     y4List.add(p);
                 } else {
                     otherList.add(p);
@@ -337,10 +341,22 @@ public class PlayerService {
     }
 
     private String findColumnValue(String[] row, Map<String, Integer> colMap, String... keys) {
+        // 1. Exact normalized match
         for (String k : keys) {
             Integer idx = colMap.get(k);
             if (idx != null && idx < row.length && row[idx] != null && !row[idx].trim().isBlank()) {
                 return row[idx].trim();
+            }
+        }
+        // 2. Substring / fuzzy match on header name (e.g. "Enter your Roll Number" contains "roll")
+        for (String k : keys) {
+            for (Map.Entry<String, Integer> entry : colMap.entrySet()) {
+                if (entry.getKey().contains(k)) {
+                    int idx = entry.getValue();
+                    if (idx < row.length && row[idx] != null && !row[idx].trim().isBlank()) {
+                        return row[idx].trim();
+                    }
+                }
             }
         }
         return "";
@@ -353,9 +369,11 @@ public class PlayerService {
             case "BATSMAN":
             case "BAT":
             case "BATSMEN":
+            case "BATTER":
                 return PlayerRole.BATSMAN;
             case "BOWLER":
             case "BOWL":
+            case "BOWLING":
                 return PlayerRole.BOWLER;
             case "ALLROUNDER":
             case "ALLROUND":
@@ -364,8 +382,13 @@ public class PlayerService {
             case "WICKETKEEPER":
             case "WK":
             case "KEEPER":
+            case "WKBATSMAN":
                 return PlayerRole.WICKET_KEEPER;
             default:
+                if (normalized.contains("KEEP") || normalized.contains("WK")) return PlayerRole.WICKET_KEEPER;
+                if (normalized.contains("ALL")) return PlayerRole.ALL_ROUNDER;
+                if (normalized.contains("BOWL")) return PlayerRole.BOWLER;
+                if (normalized.contains("BAT")) return PlayerRole.BATSMAN;
                 return null;
         }
     }

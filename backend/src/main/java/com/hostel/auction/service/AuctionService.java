@@ -460,12 +460,12 @@ public class AuctionService {
         List<Player> others = new ArrayList<>();
 
         for (Player p : eligible) {
-            String y = (p.getYear() != null) ? p.getYear().toLowerCase() : "";
-            if (y.contains("2nd") || y.contains("second") || y.matches(".*\\b2\\b.*")) {
+            int rank = PlayerService.getYearRank(p.getYear());
+            if (rank == 2) {
                 y2.add(p);
-            } else if (y.contains("3rd") || y.contains("third") || y.matches(".*\\b3\\b.*")) {
+            } else if (rank == 3) {
                 y3.add(p);
-            } else if (y.contains("4th") || y.contains("fourth") || y.contains("final") || y.matches(".*\\b4\\b.*")) {
+            } else if (rank == 4) {
                 y4.add(p);
             } else {
                 others.add(p);
