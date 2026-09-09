@@ -88,11 +88,6 @@ public class AuctionService {
 
             int currentRound = (round.getRoundNumber() != null) ? round.getRoundNumber() : 1;
 
-            // Strictly no 1st Year in auction
-            if (PlayerService.isFirstYear(player.getYear())) {
-                throw new AuctionException("FIRST_YEAR_NOT_ELIGIBLE", "1st Year players cannot participate in the auction!");
-            }
-
             // Strict per-round eligibility enforcement based on auction history
             if (!isPlayerEligibleForRound(player, currentRound)) {
                 if (player.getStatus() == PlayerStatus.SOLD || auctionRepository.existsByPlayerIdAndStatus(player.getId(), AuctionStatus.SOLD)) {
@@ -416,10 +411,6 @@ public class AuctionService {
         if (player == null || player.getStatus() == PlayerStatus.SOLD) {
             return false;
         }
-        // Strictly no 1st Year in auction
-        if (PlayerService.isFirstYear(player.getYear())) {
-            return false;
-        }
         // If player was ever marked SOLD in any auction record, never appear again
         if (auctionRepository.existsByPlayerIdAndStatus(player.getId(), AuctionStatus.SOLD)) {
             return false;
@@ -449,11 +440,11 @@ public class AuctionService {
     public List<PlayerResponse> getEligiblePlayersForRound(Integer roundNumber) {
         int round = (roundNumber != null) ? roundNumber : 1;
         List<Player> eligible = playerRepository.findAll().stream()
-                .filter(p -> !PlayerService.isFirstYear(p.getYear()))
                 .filter(p -> isPlayerEligibleForRound(p, round))
                 .collect(Collectors.toList());
 
-        // Interleave across years: 2nd Year -> 3rd Year -> 4th Year
+        // Interleave across years: 1st Year -> 2nd Year -> 3rd Year -> 4th Year
+        List<Player> y1 = new ArrayList<>();
         List<Player> y2 = new ArrayList<>();
         List<Player> y3 = new ArrayList<>();
         List<Player> y4 = new ArrayList<>();
@@ -461,7 +452,9 @@ public class AuctionService {
 
         for (Player p : eligible) {
             int rank = PlayerService.getYearRank(p.getYear());
-            if (rank == 2) {
+            if (rank == 1) {
+                y1.add(p);
+            } else if (rank == 2) {
                 y2.add(p);
             } else if (rank == 3) {
                 y3.add(p);
@@ -473,8 +466,9 @@ public class AuctionService {
         }
 
         List<PlayerResponse> result = new ArrayList<>();
-        int max = Math.max(y2.size(), Math.max(y3.size(), y4.size()));
+        int max = Math.max(Math.max(y1.size(), y2.size()), Math.max(y3.size(), y4.size()));
         for (int i = 0; i < max; i++) {
+            if (i < y1.size()) result.add(PlayerResponse.fromEntity(y1.get(i)));
             if (i < y2.size()) result.add(PlayerResponse.fromEntity(y2.get(i)));
             if (i < y3.size()) result.add(PlayerResponse.fromEntity(y3.get(i)));
             if (i < y4.size()) result.add(PlayerResponse.fromEntity(y4.get(i)));

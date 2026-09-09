@@ -164,7 +164,7 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // 4. Seed Players (Exact 10 official tournament participants with year-based pricing)
-        // 2nd Year: ₹15, 3rd Year: ₹20, 4th Year: ₹20 (no 1st year in auction)
+        // 1st Year: ₹10, 2nd Year: ₹15, 3rd Year: ₹20, 4th Year: ₹20
         List<Player> official10Players = List.of(
                 Player.builder()
                         .name("Hardik Pandya")

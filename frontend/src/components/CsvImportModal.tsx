@@ -101,15 +101,15 @@ export const CsvImportModal: React.FC<CsvImportModalProps> = ({ isOpen, onClose,
           <div className="pt-2 border-t border-slate-800/80 space-y-1.5 text-[11px]">
             <div className="flex items-center justify-between text-slate-300 font-medium">
               <span>⚡ Base Price Rules:</span>
-              <span className="text-amber-400 font-bold">2nd Year: ₹15 | 3rd Year: ₹20 | 4th Year: ₹20</span>
+              <span className="text-amber-400 font-bold">1st Year: ₹10 | 2nd Year: ₹15 | 3rd/4th Year: ₹20</span>
             </div>
             <div className="flex items-center justify-between text-slate-400">
-              <span>🚫 1st Year:</span>
-              <span className="text-rose-400 font-semibold">Excluded (Automatically skipped)</span>
+              <span>✅ 1st Year:</span>
+              <span className="text-emerald-400 font-semibold">Included (Base Price ₹10)</span>
             </div>
             <div className="flex items-center justify-between text-slate-400">
               <span>🎲 Auto-Interleaved:</span>
-              <span className="text-emerald-400 font-semibold">2nd → 3rd → 4th year alternation</span>
+              <span className="text-emerald-400 font-semibold">1st → 2nd → 3rd → 4th year alternation</span>
             </div>
           </div>
         </div>

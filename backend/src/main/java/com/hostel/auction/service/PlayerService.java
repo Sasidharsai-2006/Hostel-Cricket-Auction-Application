@@ -49,7 +49,9 @@ public class PlayerService {
     public static int getYearRank(String year) {
         if (year == null || year.isBlank()) return 3;
         String y = year.trim().toLowerCase();
-        if (y.contains("2nd") || y.contains("second") || y.matches(".*\\b(2|2nd|second|ii)\\b.*") || y.startsWith("2")) {
+        if (y.contains("1st") || y.contains("first") || y.matches(".*\\b(1|1st|first|i)\\b.*") || y.startsWith("1")) {
+            return 1;
+        } else if (y.contains("2nd") || y.contains("second") || y.matches(".*\\b(2|2nd|second|ii)\\b.*") || y.startsWith("2")) {
             return 2;
         } else if (y.contains("3rd") || y.contains("third") || y.matches(".*\\b(3|3rd|third|iii)\\b.*") || y.startsWith("3")) {
             return 3;
@@ -60,7 +62,10 @@ public class PlayerService {
     }
 
     public static int getBasePriceForYear(String year) {
-        return getYearRank(year) == 2 ? 15 : 20;
+        int rank = getYearRank(year);
+        if (rank == 1) return 10;
+        if (rank == 2) return 15;
+        return 20;
     }
 
     @Transactional(readOnly = true)
@@ -80,10 +85,6 @@ public class PlayerService {
 
     @Transactional
     public PlayerResponse createPlayer(PlayerRequest request) {
-        if (isFirstYear(request.getYear())) {
-            throw new AuctionException("FIRST_YEAR_NOT_ELIGIBLE", "1st Year players cannot participate in the auction");
-        }
-
         if (playerRepository.findByRollNumber(request.getRollNumber().trim()).isPresent()) {
             throw new AuctionException("DUPLICATE_ROLL_NUMBER", "Player with roll number " + request.getRollNumber() + " already exists");
         }
@@ -162,7 +163,6 @@ public class PlayerService {
         int imported = 0;
         int duplicates = 0;
         int invalid = 0;
-        int skipped1stYears = 0;
         List<String> duplicateRollNumbers = new ArrayList<>();
         List<String> invalidRows = new ArrayList<>();
         Set<String> seenRollNumbersInBatch = new HashSet<>();
@@ -227,14 +227,6 @@ public class PlayerService {
                         continue;
                     }
 
-                    // Strictly NO 1st Year in auction
-                    if (isFirstYear(year)) {
-                        invalid++;
-                        skipped1stYears++;
-                        invalidRows.add("Row " + rowNum + ": Skipped " + name + " (1st Year students are not eligible for auction)");
-                        continue;
-                    }
-
                     // Check duplicate roll number
                     if (seenRollNumbersInBatch.contains(rollNumber) || playerRepository.findByRollNumber(rollNumber).isPresent()) {
                         duplicates++;
@@ -251,7 +243,7 @@ public class PlayerService {
                         continue;
                     }
 
-                    // Automatic Base Price by Year: 2nd Year -> 15, 3rd Year -> 20, 4th Year -> 20
+                    // Automatic Base Price by Year: 1st Year -> 10, 2nd Year -> 15, 3rd Year -> 20, 4th Year -> 20
                     int playerBasePrice = getBasePriceForYear(year);
                     String basePriceStr = findColumnValue(row, colMap, "baseprice");
                     if (!basePriceStr.isBlank()) {
@@ -281,7 +273,8 @@ public class PlayerService {
                 }
             }
 
-            // Group by year and interleave across years: 2nd Year, 3rd Year, 4th Year
+            // Group by year and interleave across years: 1st Year, 2nd Year, 3rd Year, 4th Year
+            List<Player> y1List = new ArrayList<>();
             List<Player> y2List = new ArrayList<>();
             List<Player> y3List = new ArrayList<>();
             List<Player> y4List = new ArrayList<>();
@@ -289,7 +282,9 @@ public class PlayerService {
 
             for (Player p : playersToSave) {
                 int rank = getYearRank(p.getYear());
-                if (rank == 2) {
+                if (rank == 1) {
+                    y1List.add(p);
+                } else if (rank == 2) {
                     y2List.add(p);
                 } else if (rank == 3) {
                     y3List.add(p);
@@ -301,14 +296,16 @@ public class PlayerService {
             }
 
             // Shuffle within each year bucket for excitement and fairness
+            Collections.shuffle(y1List);
             Collections.shuffle(y2List);
             Collections.shuffle(y3List);
             Collections.shuffle(y4List);
 
-            // Interleave round-robin: 1 from 2nd, 1 from 3rd, 1 from 4th
+            // Interleave round-robin: 1 from 1st, 1 from 2nd, 1 from 3rd, 1 from 4th
             List<Player> interleaved = new ArrayList<>();
-            int maxBucket = Math.max(y2List.size(), Math.max(y3List.size(), y4List.size()));
+            int maxBucket = Math.max(Math.max(y1List.size(), y2List.size()), Math.max(y3List.size(), y4List.size()));
             for (int i = 0; i < maxBucket; i++) {
+                if (i < y1List.size()) interleaved.add(y1List.get(i));
                 if (i < y2List.size()) interleaved.add(y2List.get(i));
                 if (i < y3List.size()) interleaved.add(y3List.get(i));
                 if (i < y4List.size()) interleaved.add(y4List.get(i));
@@ -325,9 +322,6 @@ public class PlayerService {
         }
 
         String msg = "Successfully imported " + imported + " players.";
-        if (skipped1stYears > 0) {
-            msg += " (" + skipped1stYears + " 1st Year students skipped - not eligible for auction).";
-        }
 
         return ImportResultResponse.builder()
                 .total(total)

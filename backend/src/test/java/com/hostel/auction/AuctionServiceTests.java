@@ -438,7 +438,7 @@ public class AuctionServiceTests {
     }
 
     @Test
-    @DisplayName("Google Form CSV Import enforces year-based pricing, skips 1st year, and interleaves")
+    @DisplayName("Google Form CSV Import enforces year-based pricing (1st: 10, 2nd: 15, 3rd/4th: 20) and interleaves")
     void testGoogleFormCsvImportWith4Fields() {
         String csvContent = "Roll Number,Name,Year,Player Style\n" +
                 "99TEST001,Form Player One,1st Year,BATSMAN\n" +
@@ -457,12 +457,17 @@ public class AuctionServiceTests {
         ImportResultResponse result = playerService.importPlayersFromCsv(file);
 
         assertEquals(4, result.getTotal());
-        assertEquals(3, result.getImported()); // 1st year skipped!
+        assertEquals(4, result.getImported()); // All 4 years imported!
         assertEquals(0, result.getDuplicates());
-        assertEquals(1, result.getInvalid()); // 1st year marked invalid/skipped
+        assertEquals(0, result.getInvalid());
 
-        // 1st Year player was NOT created
-        assertTrue(playerRepository.findByRollNumber("99TEST001").isEmpty());
+        // 1st Year player has base price 10
+        Player p1 = playerRepository.findByRollNumber("99TEST001").orElseThrow();
+        assertEquals("Form Player One", p1.getName());
+        assertEquals("1st Year", p1.getYear());
+        assertEquals(PlayerRole.BATSMAN, p1.getRole());
+        assertEquals(10, p1.getBasePrice());
+        assertEquals(PlayerStatus.AVAILABLE, p1.getStatus());
 
         // 2nd Year player has base price 15
         Player p2 = playerRepository.findByRollNumber("99TEST002").orElseThrow();
