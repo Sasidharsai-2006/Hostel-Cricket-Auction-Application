@@ -18,9 +18,14 @@ class WebSocketService {
   public connect() {
     if (this.client && this.isConnected) return;
 
+    const wsUrl = import.meta.env.VITE_WS_URL || 
+      (import.meta.env.VITE_API_BASE_URL 
+        ? `${import.meta.env.VITE_API_BASE_URL.replace(/\/api\/?$/, '')}/ws-auction` 
+        : '/ws-auction');
+
     // Use SockJS fallback compatible with Spring Boot /ws-auction
     this.client = new Client({
-      webSocketFactory: () => new SockJS('/ws-auction'),
+      webSocketFactory: () => new SockJS(wsUrl),
       reconnectDelay: 3000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,

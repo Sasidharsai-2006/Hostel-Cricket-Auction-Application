@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { AuctionReport, AuctionState, ImportResult, Player, PlayerRole, PlayerStatus, Team, User } from '../types';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -147,11 +149,11 @@ export const auctionService = {
 
 export const pdfService = {
   downloadTeamPdf: (teamId: number, teamName: string) => {
-    window.open(`/api/pdf/team/${teamId}`, '_blank');
+    window.open(`${API_BASE}/pdf/team/${teamId}`, '_blank');
   },
 
   downloadAuctionReportPdf: () => {
-    window.open(`/api/pdf/auction-report`, '_blank');
+    window.open(`${API_BASE}/pdf/auction-report`, '_blank');
   },
 };
 
