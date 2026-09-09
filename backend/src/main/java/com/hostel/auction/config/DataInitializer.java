@@ -47,31 +47,31 @@ public class DataInitializer implements CommandLineRunner {
         // 2. Seed Teams if none exist
         if (teamRepository.count() == 0) {
             List<Team> teams = List.of(
-                    Team.builder().name("Team Tigers").captainName("Captain 1").initialPurse(1000).currentPurse(1000)
-                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=tigers").build(),
-                    Team.builder().name("Team Lions").captainName("Captain 2").initialPurse(1000).currentPurse(1000)
-                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=lions").build(),
-                    Team.builder().name("Team Warriors").captainName("Captain 3").initialPurse(1000).currentPurse(1000)
-                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=warriors").build(),
-                    Team.builder().name("Team Kings").captainName("Captain 4").initialPurse(1000).currentPurse(1000)
-                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=kings").build(),
-                    Team.builder().name("Team Strikers").captainName("Captain 5").initialPurse(1000).currentPurse(1000)
-                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=strikers").build(),
-                    Team.builder().name("Team Challengers").captainName("Captain 6").initialPurse(1000).currentPurse(1000)
-                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=challengers").build()
+                    Team.builder().name("Team Surya").captainName("Surya").initialPurse(1000).currentPurse(1000)
+                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=surya").build(),
+                    Team.builder().name("Team Durga").captainName("Durga").initialPurse(1000).currentPurse(1000)
+                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=durga").build(),
+                    Team.builder().name("Team Venky").captainName("Venky").initialPurse(1000).currentPurse(1000)
+                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=venky").build(),
+                    Team.builder().name("Team Ranjith").captainName("Ranjith").initialPurse(1000).currentPurse(1000)
+                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=ranjith").build(),
+                    Team.builder().name("Team Chitti").captainName("Chitti").initialPurse(1000).currentPurse(1000)
+                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=chitti").build(),
+                    Team.builder().name("Team Chandu").captainName("Chandu").initialPurse(1000).currentPurse(1000)
+                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=chandu").build()
             );
             teamRepository.saveAll(teams);
-            log.info("Seeded 6 Teams with 1000 purse each");
+            log.info("Seeded 6 Teams (Surya, Durga, Venky, Ranjith, Chitti, Chandu) with 1000 purse each");
         }
 
         // 3. Seed Users (1 Admin + 6 Captains)
         if (userRepository.count() == 0) {
-            Team tigers = teamRepository.findByName("Team Tigers").orElse(null);
-            Team lions = teamRepository.findByName("Team Lions").orElse(null);
-            Team warriors = teamRepository.findByName("Team Warriors").orElse(null);
-            Team kings = teamRepository.findByName("Team Kings").orElse(null);
-            Team strikers = teamRepository.findByName("Team Strikers").orElse(null);
-            Team challengers = teamRepository.findByName("Team Challengers").orElse(null);
+            Team surya = teamRepository.findByName("Team Surya").orElse(null);
+            Team durga = teamRepository.findByName("Team Durga").orElse(null);
+            Team venky = teamRepository.findByName("Team Venky").orElse(null);
+            Team ranjith = teamRepository.findByName("Team Ranjith").orElse(null);
+            Team chitti = teamRepository.findByName("Team Chitti").orElse(null);
+            Team chandu = teamRepository.findByName("Team Chandu").orElse(null);
 
             List<User> users = List.of(
                     User.builder()
@@ -84,48 +84,83 @@ public class DataInitializer implements CommandLineRunner {
                     User.builder()
                             .username("captain1")
                             .password("Captain@101")
-                            .displayName("Captain 1 (Tigers)")
+                            .displayName("Captain 1 (Surya)")
                             .userType(UserType.CAPTAIN)
-                            .team(tigers)
+                            .team(surya)
                             .build(),
                     User.builder()
                             .username("captain2")
                             .password("Captain@102")
-                            .displayName("Captain 2 (Lions)")
+                            .displayName("Captain 2 (Durga)")
                             .userType(UserType.CAPTAIN)
-                            .team(lions)
+                            .team(durga)
                             .build(),
                     User.builder()
                             .username("captain3")
                             .password("Captain@103")
-                            .displayName("Captain 3 (Warriors)")
+                            .displayName("Captain 3 (Venky)")
                             .userType(UserType.CAPTAIN)
-                            .team(warriors)
+                            .team(venky)
                             .build(),
                     User.builder()
                             .username("captain4")
                             .password("Captain@104")
-                            .displayName("Captain 4 (Kings)")
+                            .displayName("Captain 4 (Ranjith)")
                             .userType(UserType.CAPTAIN)
-                            .team(kings)
+                            .team(ranjith)
                             .build(),
                     User.builder()
                             .username("captain5")
                             .password("Captain@105")
-                            .displayName("Captain 5 (Strikers)")
+                            .displayName("Captain 5 (Chitti)")
                             .userType(UserType.CAPTAIN)
-                            .team(strikers)
+                            .team(chitti)
                             .build(),
                     User.builder()
                             .username("captain6")
                             .password("Captain@106")
-                            .displayName("Captain 6 (Challengers)")
+                            .displayName("Captain 6 (Chandu)")
                             .userType(UserType.CAPTAIN)
-                            .team(challengers)
+                            .team(chandu)
                             .build()
             );
             userRepository.saveAll(users);
             log.info("Seeded 1 Admin and 6 Captain accounts");
+        }
+
+        // Automatic migration: Ensure existing database records match new official team names
+        List<Team> existingTeams = teamRepository.findAll();
+        if (!existingTeams.isEmpty()) {
+            String[][] officialTeams = {
+                    {"Team Surya", "Surya", "surya"},
+                    {"Team Durga", "Durga", "durga"},
+                    {"Team Venky", "Venky", "venky"},
+                    {"Team Ranjith", "Ranjith", "ranjith"},
+                    {"Team Chitti", "Chitti", "chitti"},
+                    {"Team Chandu", "Chandu", "chandu"}
+            };
+            for (int i = 0; i < 6 && i < existingTeams.size(); i++) {
+                Team t = existingTeams.get(i);
+                if (!t.getName().equals(officialTeams[i][0]) || !t.getCaptainName().equals(officialTeams[i][1])) {
+                    t.setName(officialTeams[i][0]);
+                    t.setCaptainName(officialTeams[i][1]);
+                    t.setLogoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=" + officialTeams[i][2]);
+                    teamRepository.save(t);
+                }
+            }
+        }
+
+        String[] capUsernames = {"captain1", "captain2", "captain3", "captain4", "captain5", "captain6"};
+        String[] capNames = {"Surya", "Durga", "Venky", "Ranjith", "Chitti", "Chandu"};
+        for (int i = 0; i < 6; i++) {
+            final int idx = i;
+            userRepository.findByUsername(capUsernames[i]).ifPresent(u -> {
+                String targetDisplay = "Captain " + (idx + 1) + " (" + capNames[idx] + ")";
+                if (!targetDisplay.equals(u.getDisplayName())) {
+                    u.setDisplayName(targetDisplay);
+                    userRepository.save(u);
+                }
+            });
         }
 
         // 4. Seed Players (Exact 10 official tournament participants with year-based pricing)

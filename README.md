@@ -51,12 +51,12 @@ The system has exactly 7 accounts pre-configured with 1-click quick login button
 | Role | Username | Password | Assigned Franchise | Initial Purse |
 | :--- | :--- | :--- | :--- | :--- |
 | **Admin** | `admin` | `Admin@123` | Control Center | Controls All |
-| **Captain 1** | `captain1` | `Captain@101` | **Team Tigers** | ₹1,000 |
-| **Captain 2** | `captain2` | `Captain@102` | **Team Lions** | ₹1,000 |
-| **Captain 3** | `captain3` | `Captain@103` | **Team Warriors** | ₹1,000 |
-| **Captain 4** | `captain4` | `Captain@104` | **Team Kings** | ₹1,000 |
-| **Captain 5** | `captain5` | `Captain@105` | **Team Strikers** | ₹1,000 |
-| **Captain 6** | `captain6` | `Captain@106` | **Team Challengers** | ₹1,000 |
+| **Captain 1** | `captain1` | `Captain@101` | **Team Surya** | ₹1,000 |
+| **Captain 2** | `captain2` | `Captain@102` | **Team Durga** | ₹1,000 |
+| **Captain 3** | `captain3` | `Captain@103` | **Team Venky** | ₹1,000 |
+| **Captain 4** | `captain4` | `Captain@104` | **Team Ranjith** | ₹1,000 |
+| **Captain 5** | `captain5` | `Captain@105` | **Team Chitti** | ₹1,000 |
+| **Captain 6** | `captain6` | `Captain@106` | **Team Chandu** | ₹1,000 |
 
 ---
 
