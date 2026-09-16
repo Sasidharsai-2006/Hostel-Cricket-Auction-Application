@@ -24,7 +24,7 @@ public class Player {
     @Column(name = "roll_number", nullable = false, unique = true)
     private String rollNumber;
 
-    @Column(nullable = false)
+    @Column(name = "`year`", nullable = false)
     private String year;
 
     @Enumerated(EnumType.STRING)

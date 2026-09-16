@@ -65,7 +65,7 @@ public class ResilientDataSourceConfig {
 
     private DataSource createH2DataSource() {
         HikariConfig h2Config = new HikariConfig();
-        h2Config.setJdbcUrl("jdbc:h2:mem:hostel_auction_db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1");
+        h2Config.setJdbcUrl("jdbc:h2:mem:hostel_auction_db;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;NON_KEYWORDS=YEAR,USER");
         h2Config.setUsername("sa");
         h2Config.setPassword("");
         h2Config.setDriverClassName("org.h2.Driver");
