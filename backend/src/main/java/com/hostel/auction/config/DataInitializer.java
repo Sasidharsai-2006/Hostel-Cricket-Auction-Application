@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -64,68 +65,60 @@ public class DataInitializer implements CommandLineRunner {
             log.info("Seeded 6 Teams (Surya, Durga, Venky, Ranjith, Chitti, Chandu) with 1000 purse each");
         }
 
-        // 3. Seed Users (1 Admin + 6 Captains)
-        if (userRepository.count() == 0) {
-            Team surya = teamRepository.findByName("Team Surya").orElse(null);
-            Team durga = teamRepository.findByName("Team Durga").orElse(null);
-            Team venky = teamRepository.findByName("Team Venky").orElse(null);
-            Team ranjith = teamRepository.findByName("Team Ranjith").orElse(null);
-            Team chitti = teamRepository.findByName("Team Chitti").orElse(null);
-            Team chandu = teamRepository.findByName("Team Chandu").orElse(null);
+        // 3. Seed / Reconcile Users (1 Admin + 6 Captains)
+        Team surya = teamRepository.findByName("Team Surya").orElse(null);
+        Team durga = teamRepository.findByName("Team Durga").orElse(null);
+        Team venky = teamRepository.findByName("Team Venky").orElse(null);
+        Team ranjith = teamRepository.findByName("Team Ranjith").orElse(null);
+        Team chitti = teamRepository.findByName("Team Chitti").orElse(null);
+        Team chandu = teamRepository.findByName("Team Chandu").orElse(null);
 
-            List<User> users = List.of(
-                    User.builder()
-                            .username("admin")
-                            .password("Admin@123")
-                            .displayName("Auction Administrator")
-                            .userType(UserType.ADMIN)
-                            .team(null)
-                            .build(),
-                    User.builder()
-                            .username("captain1")
-                            .password("Captain@101")
-                            .displayName("Captain 1 (Surya)")
-                            .userType(UserType.CAPTAIN)
-                            .team(surya)
-                            .build(),
-                    User.builder()
-                            .username("captain2")
-                            .password("Captain@102")
-                            .displayName("Captain 2 (Durga)")
-                            .userType(UserType.CAPTAIN)
-                            .team(durga)
-                            .build(),
-                    User.builder()
-                            .username("captain3")
-                            .password("Captain@103")
-                            .displayName("Captain 3 (Venky)")
-                            .userType(UserType.CAPTAIN)
-                            .team(venky)
-                            .build(),
-                    User.builder()
-                            .username("captain4")
-                            .password("Captain@104")
-                            .displayName("Captain 4 (Ranjith)")
-                            .userType(UserType.CAPTAIN)
-                            .team(ranjith)
-                            .build(),
-                    User.builder()
-                            .username("captain5")
-                            .password("Captain@105")
-                            .displayName("Captain 5 (Chitti)")
-                            .userType(UserType.CAPTAIN)
-                            .team(chitti)
-                            .build(),
-                    User.builder()
-                            .username("captain6")
-                            .password("Captain@106")
-                            .displayName("Captain 6 (Chandu)")
-                            .userType(UserType.CAPTAIN)
-                            .team(chandu)
-                            .build()
-            );
-            userRepository.saveAll(users);
-            log.info("Seeded 1 Admin and 6 Captain accounts");
+        // Ensure Admin user always exists and password is set to Admin@123
+        Optional<User> adminOpt = userRepository.findByUsername("admin");
+        if (adminOpt.isEmpty()) {
+            userRepository.save(User.builder()
+                    .username("admin")
+                    .password("Admin@123")
+                    .displayName("Auction Administrator")
+                    .userType(UserType.ADMIN)
+                    .team(null)
+                    .build());
+            log.info("Seeded Admin account");
+        } else {
+            User admin = adminOpt.get();
+            admin.setPassword("Admin@123");
+            admin.setUserType(UserType.ADMIN);
+            userRepository.save(admin);
+        }
+
+        // Ensure all 6 Captain accounts exist and have correct team associations and passwords
+        String[] capUsernames = {"captain1", "captain2", "captain3", "captain4", "captain5", "captain6"};
+        String[] capPasswords = {"Captain@101", "Captain@102", "Captain@103", "Captain@104", "Captain@105", "Captain@106"};
+        String[] capNames = {"Surya", "Durga", "Venky", "Ranjith", "Chitti", "Chandu"};
+        Team[] capTeams = {surya, durga, venky, ranjith, chitti, chandu};
+
+        for (int i = 0; i < 6; i++) {
+            final int idx = i;
+            String targetDisplay = "Captain " + (idx + 1) + " (" + capNames[idx] + ")";
+            Optional<User> capOpt = userRepository.findByUsername(capUsernames[idx]);
+            if (capOpt.isEmpty()) {
+                userRepository.save(User.builder()
+                        .username(capUsernames[idx])
+                        .password(capPasswords[idx])
+                        .displayName(targetDisplay)
+                        .userType(UserType.CAPTAIN)
+                        .team(capTeams[idx])
+                        .build());
+                log.info("Seeded captain account: {}", capUsernames[idx]);
+            } else {
+                User u = capOpt.get();
+                u.setPassword(capPasswords[idx]);
+                u.setDisplayName(targetDisplay);
+                if (capTeams[idx] != null) {
+                    u.setTeam(capTeams[idx]);
+                }
+                userRepository.save(u);
+            }
         }
 
         // Automatic migration: Ensure existing database records match new official team names
@@ -148,19 +141,6 @@ public class DataInitializer implements CommandLineRunner {
                     teamRepository.save(t);
                 }
             }
-        }
-
-        String[] capUsernames = {"captain1", "captain2", "captain3", "captain4", "captain5", "captain6"};
-        String[] capNames = {"Surya", "Durga", "Venky", "Ranjith", "Chitti", "Chandu"};
-        for (int i = 0; i < 6; i++) {
-            final int idx = i;
-            userRepository.findByUsername(capUsernames[i]).ifPresent(u -> {
-                String targetDisplay = "Captain " + (idx + 1) + " (" + capNames[idx] + ")";
-                if (!targetDisplay.equals(u.getDisplayName())) {
-                    u.setDisplayName(targetDisplay);
-                    userRepository.save(u);
-                }
-            });
         }
 
         // 4. Seed Players (Exact 10 official tournament participants with year-based pricing)
