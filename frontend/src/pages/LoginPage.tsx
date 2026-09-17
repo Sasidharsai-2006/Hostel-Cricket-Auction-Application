@@ -43,8 +43,8 @@ export const LoginPage: React.FC = () => {
 
   const quickCredentials = [
     { label: 'Admin', u: 'admin', p: 'Admin@123', color: 'border-amber-500/40 text-amber-400' },
-    { label: 'Captain 1 (Surya)', u: 'captain1', p: 'Captain@101', color: 'border-blue-500/40 text-blue-400' },
-    { label: 'Captain 2 (Durga)', u: 'captain2', p: 'Captain@102', color: 'border-emerald-500/40 text-emerald-400' },
+    { label: 'Captain 1 (Surii)', u: 'captain1', p: 'Captain@101', color: 'border-blue-500/40 text-blue-400' },
+    { label: 'Captain 2 (Shetty)', u: 'captain2', p: 'Captain@102', color: 'border-emerald-500/40 text-emerald-400' },
     { label: 'Captain 3 (Venky)', u: 'captain3', p: 'Captain@103', color: 'border-purple-500/40 text-purple-400' },
     { label: 'Captain 4 (Ranjith)', u: 'captain4', p: 'Captain@104', color: 'border-yellow-500/40 text-yellow-400' },
     { label: 'Captain 5 (Chitti)', u: 'captain5', p: 'Captain@105', color: 'border-rose-500/40 text-rose-400' },

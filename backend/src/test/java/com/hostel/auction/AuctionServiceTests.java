@@ -44,8 +44,8 @@ public class AuctionServiceTests {
     @Autowired
     private AuctionRepository auctionRepository;
 
-    private Team teamSurya;
-    private Team teamDurga;
+    private Team teamSurii;
+    private Team teamShetty;
     private Player testPlayer;
 
     @BeforeEach
@@ -57,13 +57,13 @@ public class AuctionServiceTests {
             }
         });
 
-        teamSurya = teamRepository.findByName("Team Surya").orElseThrow();
-        teamSurya.setCurrentPurse(1000);
-        teamRepository.save(teamSurya);
+        teamSurii = teamRepository.findByName("Team Surii").orElseThrow();
+        teamSurii.setCurrentPurse(1000);
+        teamRepository.save(teamSurii);
 
-        teamDurga = teamRepository.findByName("Team Durga").orElseThrow();
-        teamDurga.setCurrentPurse(1000);
-        teamRepository.save(teamDurga);
+        teamShetty = teamRepository.findByName("Team Shetty").orElseThrow();
+        teamShetty.setCurrentPurse(1000);
+        teamRepository.save(teamShetty);
 
         // Always ensure Round 1 is active for tests
         auctionService.setRound(1);
@@ -82,8 +82,8 @@ public class AuctionServiceTests {
     @Test
     @DisplayName("1. Team starts with exactly 1000 points")
     void testTeamInitialPurse() {
-        assertEquals(1000, teamSurya.getInitialPurse());
-        assertEquals(1000, teamSurya.getCurrentPurse());
+        assertEquals(1000, teamSurii.getInitialPurse());
+        assertEquals(1000, teamSurii.getCurrentPurse());
     }
 
     @Test
@@ -95,13 +95,13 @@ public class AuctionServiceTests {
 
         BidRequest bid = BidRequest.builder()
                 .captainUsername("captain1")
-                .teamId(teamSurya.getId())
+                .teamId(teamSurii.getId())
                 .amount(60)
                 .build();
 
         AuctionStateResponse updated = auctionService.placeBid(bid);
         assertEquals(60, updated.getCurrentPrice());
-        assertEquals(teamSurya.getId(), updated.getHighestBidderTeamId());
+        assertEquals(teamSurii.getId(), updated.getHighestBidderTeamId());
     }
 
     @Test
@@ -112,14 +112,14 @@ public class AuctionServiceTests {
         // Place initial bid of 60
         auctionService.placeBid(BidRequest.builder()
                 .captainUsername("captain1")
-                .teamId(teamSurya.getId())
+                .teamId(teamSurii.getId())
                 .amount(60)
                 .build());
 
         // Attempt lower bid of 55
         BidRequest lowerBid = BidRequest.builder()
                 .captainUsername("captain2")
-                .teamId(teamDurga.getId())
+                .teamId(teamShetty.getId())
                 .amount(55)
                 .build();
 
@@ -134,13 +134,13 @@ public class AuctionServiceTests {
 
         auctionService.placeBid(BidRequest.builder()
                 .captainUsername("captain1")
-                .teamId(teamSurya.getId())
+                .teamId(teamSurii.getId())
                 .amount(80)
                 .build());
 
         BidRequest equalBid = BidRequest.builder()
                 .captainUsername("captain2")
-                .teamId(teamDurga.getId())
+                .teamId(teamShetty.getId())
                 .amount(80)
                 .build();
 
@@ -155,7 +155,7 @@ public class AuctionServiceTests {
 
         BidRequest hugeBid = BidRequest.builder()
                 .captainUsername("captain1")
-                .teamId(teamSurya.getId())
+                .teamId(teamSurii.getId())
                 .amount(1200) // 1200 > 1000
                 .build();
 
@@ -170,12 +170,12 @@ public class AuctionServiceTests {
 
         auctionService.placeBid(BidRequest.builder()
                 .captainUsername("captain1")
-                .teamId(teamSurya.getId())
+                .teamId(teamSurii.getId())
                 .amount(100)
                 .build());
 
         // Reload team from DB
-        Team reloaded = teamRepository.findById(teamSurya.getId()).orElseThrow();
+        Team reloaded = teamRepository.findById(teamSurii.getId()).orElseThrow();
         assertEquals(1000, reloaded.getCurrentPurse(), "Purse must remain 1000 during active bidding!");
     }
 
@@ -186,7 +186,7 @@ public class AuctionServiceTests {
 
         auctionService.placeBid(BidRequest.builder()
                 .captainUsername("captain1")
-                .teamId(teamSurya.getId())
+                .teamId(teamSurii.getId())
                 .amount(250)
                 .build());
 
@@ -198,10 +198,10 @@ public class AuctionServiceTests {
         assertEquals(PlayerStatus.SOLD, playerDb.getStatus());
         assertEquals(250, playerDb.getSoldPrice());
         assertNotNull(playerDb.getTeam());
-        assertEquals(teamSurya.getId(), playerDb.getTeam().getId());
+        assertEquals(teamSurii.getId(), playerDb.getTeam().getId());
 
         // Verify Team Purse deducted by 250
-        Team teamDb = teamRepository.findById(teamSurya.getId()).orElseThrow();
+        Team teamDb = teamRepository.findById(teamSurii.getId()).orElseThrow();
         assertEquals(750, teamDb.getCurrentPurse());
     }
 
@@ -211,7 +211,7 @@ public class AuctionServiceTests {
         AuctionStateResponse auction = auctionService.startAuction(testPlayer.getId(), 50);
         auctionService.placeBid(BidRequest.builder()
                 .captainUsername("captain1")
-                .teamId(teamSurya.getId())
+                .teamId(teamSurii.getId())
                 .amount(100)
                 .build());
         auctionService.markSold(auction.getAuctionId());
@@ -232,7 +232,7 @@ public class AuctionServiceTests {
         assertNull(playerDb.getTeam());
         assertNull(playerDb.getSoldPrice());
 
-        Team teamDb = teamRepository.findById(teamSurya.getId()).orElseThrow();
+        Team teamDb = teamRepository.findById(teamSurii.getId()).orElseThrow();
         assertEquals(1000, teamDb.getCurrentPurse());
     }
 
@@ -257,7 +257,7 @@ public class AuctionServiceTests {
         AuctionStateResponse round2Auction = auctionService.startAuction(testPlayer.getId(), 50);
         auctionService.placeBid(BidRequest.builder()
                 .captainUsername("captain1")
-                .teamId(teamSurya.getId())
+                .teamId(teamSurii.getId())
                 .amount(100)
                 .build());
         auctionService.markSold(round2Auction.getAuctionId());
@@ -277,22 +277,22 @@ public class AuctionServiceTests {
         AuctionStateResponse auction = auctionService.startAuction(testPlayer.getId(), 50);
         auctionService.placeBid(BidRequest.builder()
                 .captainUsername("captain1")
-                .teamId(teamSurya.getId())
+                .teamId(teamSurii.getId())
                 .amount(200)
                 .build());
         auctionService.markSold(auction.getAuctionId());
 
         // Ensure sold
-        Team suryaSold = teamRepository.findById(teamSurya.getId()).orElseThrow();
-        assertEquals(800, suryaSold.getCurrentPurse());
+        Team suriiSold = teamRepository.findById(teamSurii.getId()).orElseThrow();
+        assertEquals(800, suriiSold.getCurrentPurse());
 
         // Perform UNDO
         AuctionStateResponse undoState = auctionService.undoLastSale();
         assertNotNull(undoState);
 
         // Check restored purse
-        Team suryaRestored = teamRepository.findById(teamSurya.getId()).orElseThrow();
-        assertEquals(1000, suryaRestored.getCurrentPurse());
+        Team suriiRestored = teamRepository.findById(teamSurii.getId()).orElseThrow();
+        assertEquals(1000, suriiRestored.getCurrentPurse());
 
         // Check player status restored
         Player playerRestored = playerRepository.findById(testPlayer.getId()).orElseThrow();
@@ -307,8 +307,8 @@ public class AuctionServiceTests {
         auctionService.startAuction(testPlayer.getId(), 50);
 
         BidRequest invalidBid = BidRequest.builder()
-                .captainUsername("captain1") // captain1 owns Team Surya
-                .teamId(teamDurga.getId())   // attempting to bid for Team Durga
+                .captainUsername("captain1") // captain1 owns Team Surii
+                .teamId(teamShetty.getId())   // attempting to bid for Team Shetty
                 .amount(100)
                 .build();
 
@@ -355,7 +355,7 @@ public class AuctionServiceTests {
         AuctionStateResponse rahulR1 = auctionService.startAuction(rahul.getId(), 50);
         auctionService.placeBid(BidRequest.builder()
                 .captainUsername("captain1")
-                .teamId(teamSurya.getId())
+                .teamId(teamSurii.getId())
                 .amount(300)
                 .build());
         auctionService.markSold(rahulR1.getAuctionId());
@@ -401,7 +401,7 @@ public class AuctionServiceTests {
         AuctionStateResponse arjunR2 = auctionService.startAuction(arjun.getId(), 40);
         auctionService.placeBid(BidRequest.builder()
                 .captainUsername("captain2")
-                .teamId(teamDurga.getId())
+                .teamId(teamShetty.getId())
                 .amount(200)
                 .build());
         auctionService.markSold(arjunR2.getAuctionId());

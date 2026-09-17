@@ -48,10 +48,10 @@ public class DataInitializer implements CommandLineRunner {
         // 2. Seed Teams if none exist
         if (teamRepository.count() == 0) {
             List<Team> teams = List.of(
-                    Team.builder().name("Team Surya").captainName("Surya").initialPurse(1000).currentPurse(1000)
-                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=surya").build(),
-                    Team.builder().name("Team Durga").captainName("Durga").initialPurse(1000).currentPurse(1000)
-                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=durga").build(),
+                    Team.builder().name("Team Surii").captainName("Surii").initialPurse(1000).currentPurse(1000)
+                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=surii").build(),
+                    Team.builder().name("Team Shetty").captainName("Shetty").initialPurse(1000).currentPurse(1000)
+                            .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=shetty").build(),
                     Team.builder().name("Team Venky").captainName("Venky").initialPurse(1000).currentPurse(1000)
                             .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=venky").build(),
                     Team.builder().name("Team Ranjith").captainName("Ranjith").initialPurse(1000).currentPurse(1000)
@@ -62,12 +62,12 @@ public class DataInitializer implements CommandLineRunner {
                             .logoUrl("https://api.dicebear.com/7.x/identicon/svg?seed=chandu").build()
             );
             teamRepository.saveAll(teams);
-            log.info("Seeded 6 Teams (Surya, Durga, Venky, Ranjith, Chitti, Chandu) with 1000 purse each");
+            log.info("Seeded 6 Teams (Surii, Shetty, Venky, Ranjith, Chitti, Chandu) with 1000 purse each");
         }
 
         // 3. Seed / Reconcile Users (1 Admin + 6 Captains)
-        Team surya = teamRepository.findByName("Team Surya").orElse(null);
-        Team durga = teamRepository.findByName("Team Durga").orElse(null);
+        Team surii = teamRepository.findByName("Team Surii").orElse(null);
+        Team shetty = teamRepository.findByName("Team Shetty").orElse(null);
         Team venky = teamRepository.findByName("Team Venky").orElse(null);
         Team ranjith = teamRepository.findByName("Team Ranjith").orElse(null);
         Team chitti = teamRepository.findByName("Team Chitti").orElse(null);
@@ -94,8 +94,8 @@ public class DataInitializer implements CommandLineRunner {
         // Ensure all 6 Captain accounts exist and have correct team associations and passwords
         String[] capUsernames = {"captain1", "captain2", "captain3", "captain4", "captain5", "captain6"};
         String[] capPasswords = {"Captain@101", "Captain@102", "Captain@103", "Captain@104", "Captain@105", "Captain@106"};
-        String[] capNames = {"Surya", "Durga", "Venky", "Ranjith", "Chitti", "Chandu"};
-        Team[] capTeams = {surya, durga, venky, ranjith, chitti, chandu};
+        String[] capNames = {"Surii", "Shetty", "Venky", "Ranjith", "Chitti", "Chandu"};
+        Team[] capTeams = {surii, shetty, venky, ranjith, chitti, chandu};
 
         for (int i = 0; i < 6; i++) {
             final int idx = i;
@@ -125,8 +125,8 @@ public class DataInitializer implements CommandLineRunner {
         List<Team> existingTeams = teamRepository.findAll();
         if (!existingTeams.isEmpty()) {
             String[][] officialTeams = {
-                    {"Team Surya", "Surya", "surya"},
-                    {"Team Durga", "Durga", "durga"},
+                    {"Team Surii", "Surii", "surii"},
+                    {"Team Shetty", "Shetty", "shetty"},
                     {"Team Venky", "Venky", "venky"},
                     {"Team Ranjith", "Ranjith", "ranjith"},
                     {"Team Chitti", "Chitti", "chitti"},
